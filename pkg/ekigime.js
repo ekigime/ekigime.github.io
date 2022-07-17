@@ -177,12 +177,12 @@ function getStringFromWasm0(ptr, len) {
 * @param {string} eki_id
 * @returns {string}
 */
-export function get_min_all(eki_id) {
+export function get_min_all_json(eki_id) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(eki_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.get_min_all(retptr, ptr0, len0);
+        wasm.get_min_all_json(retptr, ptr0, len0);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         return getStringFromWasm0(r0, r1);
@@ -195,10 +195,10 @@ export function get_min_all(eki_id) {
 /**
 * @returns {string}
 */
-export function get_eki_all() {
+export function get_eki_all_json() {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        wasm.get_eki_all(retptr);
+        wasm.get_eki_all_json(retptr);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         return getStringFromWasm0(r0, r1);
@@ -256,6 +256,9 @@ function getImports() {
     imports.wbg = {};
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
+    };
+    imports.wbg.__wbg_log_d7c6f47284e542ef = function(arg0, arg1) {
+        console.log(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_instanceof_Window_a2a08d3918d7d4d0 = function(arg0) {
         const ret = getObject(arg0) instanceof Window;

@@ -1,0 +1,12 @@
+table {
+    border: 2px solid black;
+    border-collapse: collapse;
+}
+td {
+    padding: 0.2ex 1ex;
+    text-align: right;
+    width: 6em;
+    border-style: none solid;
+    border-collapse: collapse;
+
+}

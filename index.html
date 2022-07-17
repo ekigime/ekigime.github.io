@@ -1,16 +1,17 @@
 <html>
 <head>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <script type="module">
-import { get_min_all, get_eki_all, default as init } from './pkg/ekigime.js'
+import { get_min_all_json, get_eki_all_json, default as init } from './pkg/ekigime.js'
 
 (async function () {
     await init();
     window.get_min_all_obj = function (eki_id) {
-        return JSON.parse(get_min_all(eki_id));
+        return JSON.parse(get_min_all_json(eki_id));
     };
-    window.eki_id = JSON.parse(get_eki_all());
+    window.eki_id = JSON.parse(get_eki_all_json());
     window.id_eki = {};
     for (let eki in eki_id) {
         window.id_eki[eki_id[eki]] = eki;
@@ -29,6 +30,17 @@ import { get_min_all, get_eki_all, default as init } from './pkg/ekigime.js'
     }
     document.body.appendChild(datalist);
 })();
+
+window.min2string = function (min) {
+    let min_int = parseInt(min * 10, 10);
+    let hour_int = Math.floor(min_int / 600);
+    let min_nokori = min_int % 600;
+    if (hour_int >= 1) {
+        return String(hour_int) + '時間' + String(min_nokori / 10) + '分';
+    } else {
+        return String(min_nokori / 10) + '分';
+    }
+};
 
 window.keisan = function () {
     if (!window.get_min_all_obj || !window.eki_id) {
@@ -55,18 +67,19 @@ window.keisan = function () {
     });
 
     //　出力
+    let emoji = { 0: '🥇', 1: '🥈', 2: '🥉', 3: '', 4: '' };
     for (let i = 0; i < 5 ; i++) {
         //console.log(sorted_eki[i] + ', ' + id_eki[sorted_eki[i]] + ', ' + result[0][sorted_eki[i]] + ', ');
         for (let j = 1; j <= 10; j++) {
             let element = document.getElementById('a' + j + '-' + (i + 1) );
-            element.innerText = j <= eki_max ? result[j][sorted_eki[i]] : '';
+            element.innerText = j <= eki_max ? min2string(result[j][sorted_eki[i]]) : '';
         }
         let res = document.getElementById('result-' + (i + 1) );
-        res.innerText = id_eki[sorted_eki[i]];
+        res.innerText = emoji[i] + '\n' + id_eki[sorted_eki[i]];
         let avg = document.getElementById('avg-' + (i + 1) );
-        avg.innerText = result[0][sorted_eki[i]] / eki_max;
+        avg.innerText = min2string(result[0][sorted_eki[i]] / eki_max);
     }
-}
+};
 </script>
 <table>
 <tr><td><a id="result-0">乗車時間ランキング：</a></td><td><a id="result-1"></a></td><td><a id="result-2"></a></td><td><a id="result-3"></a></td><td><a id="result-4"></a></td><td><a id="result-5"></a></td></tr>

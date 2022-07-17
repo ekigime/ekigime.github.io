@@ -4,18 +4,18 @@
 * @param {string} eki_id
 * @returns {string}
 */
-export function get_min_all(eki_id: string): string;
+export function get_min_all_json(eki_id: string): string;
 /**
 * @returns {string}
 */
-export function get_eki_all(): string;
+export function get_eki_all_json(): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly get_min_all: (a: number, b: number, c: number) => void;
-  readonly get_eki_all: (a: number) => void;
+  readonly get_min_all_json: (a: number, b: number, c: number) => void;
+  readonly get_eki_all_json: (a: number) => void;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
