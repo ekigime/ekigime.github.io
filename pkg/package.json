@@ -1,0 +1,12 @@
+{
+  "name": "ekigime",
+  "version": "0.1.0",
+  "files": [
+    "ekigime_bg.wasm",
+    "ekigime.js",
+    "ekigime.d.ts"
+  ],
+  "module": "ekigime.js",
+  "types": "ekigime.d.ts",
+  "sideEffects": false
+}
