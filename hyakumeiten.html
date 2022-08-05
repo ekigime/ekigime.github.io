@@ -1,0 +1,114 @@
+<html>
+<head>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<script type="module">
+import { get_min_all_json, get_eki_all_json, hyakumeiten_json, default as init } from './pkg/ekigime.js'
+
+(async function () {
+    await init();
+    window.get_min_all_obj = function (eki_id) {
+        return JSON.parse(get_min_all_json(eki_id));
+    };
+    window.hyakumeiten = JSON.parse(hyakumeiten_json());
+    window.eki_id = JSON.parse(get_eki_all_json());
+    window.id_eki = {};
+    for (let eki in eki_id) {
+        window.id_eki[eki_id[eki]] = eki;
+    }
+
+    // auto complete / suggest 用に datalist を追加
+    let datalist = document.createElement('datalist');
+    datalist.id = "ekilist";
+    for (let eki of Object.keys(eki_id).sort()) {
+        if (eki == "DUMMY") {
+            continue;
+        }
+        let option = document.createElement('option');
+        option.innerText = eki;
+        datalist.appendChild(option);
+    }
+    document.body.appendChild(datalist);
+})();
+window.checkchange = function (event) {
+    let element = event.target;
+    let category = element.value;
+    let elements = document.getElementsByClassName(category);
+    if (element.checked) {
+        element.parentNode.style.background = "#dadada";
+        for (let e of elements) {
+            e.style.display = "block";
+        }
+    } else {
+        element.parentNode.style.background = "#ffffff";
+        for (let e of elements) {
+            e.style.display = "none";
+        }
+    }
+    //console.log(event.target);
+};
+window.allchange = function (display) {
+    let checks = document.getElementsByClassName("check");
+    for (let c of checks) {
+        c.parentNode.style.background = display ? "#dadada" : "#ffffff";
+        c.checked = display;
+    }
+    let elements = document.getElementsByClassName("食べログ");
+    for (let e of elements) {
+        e.style.display = display ? "block" : "none";
+    }
+};
+window.hyouji = function () {
+    if (!window.get_min_all_obj || !window.eki_id) {
+        return;
+    }
+    // 駅順
+    let element = document.getElementById('eki');
+    if (!element || !element.value || !eki_id[element.value]) {
+        return;
+    }
+    let min_all = get_min_all_obj(eki_id[element.value]);
+
+    let result = Object.keys(eki_id).map(function (eki) {
+        return [ eki, parseInt(min_all[eki_id[eki]]), hyakumeiten[eki_id[eki]] ];
+    });
+    console.log(result);
+
+    // 百名店があった駅だけ表示する
+    result = result.filter(function (record) {
+        return record[2] && record[1] != 9999;
+    }).sort(function (a, b) {
+        if (a[1] > b[1]) {
+            return 1;
+        } else if (a[1] < b[1]) {
+            return -1;
+        } else {
+            return 0;
+        }
+    });
+    console.log(result);
+
+    let result_ele = document.getElementById('result');
+    let category_list = {};
+    let output = '<table class="hyakumeiten">' + result.map(function (record) {
+        return '<tr><td>' + record[0]  + '</td><td>' + record[1]  + '</td><td class="shop">' + Object.keys(record[2]).sort().map(function (name) {
+            let category = name.split(':')[0];
+            category_list[category] = 1;
+            return '<p class="' + category + '"><a target="_blank" href="' + record[2][name] + '">' + name + '</a></p>';
+        }).join('') + '</td></tr>';
+    }).join('') + '</table>';
+
+    result_ele.innerHTML = '<input onclick="allchange(1)" type="button" value="全てチェック">'
+    + '<input onclick="allchange(0)" type="button" value="全て外す">'
+    + Object.keys(category_list).sort().map(function (category) {
+        return '<label><input checked="checked" class="check" onchange="checkchange(arguments[0])" type="checkbox" value="' + category + '">' + category + '</label>';
+    }).join('') + output;
+};
+</script>
+
+<input id="eki" value="" list="ekilist" /> <button onclick="hyouji()">表示</button>
+<div id="result"></div>
+
+</body>
+</html>

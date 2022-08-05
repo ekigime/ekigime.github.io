@@ -10,3 +10,14 @@ td {
     border-collapse: collapse;
 
 }
+table.hyakumeiten td {
+    border-style: solid;
+}
+td.shop {
+    width: 60em;
+}
+label {
+    border: 1px solid #999999;
+    background: #dadada;
+    font-weight: normal;
+}
