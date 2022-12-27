@@ -1,101 +1,53 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<link rel="stylesheet" href="/style.css">
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
+<title>えきぎめ - トップ</title>
 </head>
 <body>
-<script type="module">
-import { get_min_all_json, get_eki_all_json, default as init } from './pkg/ekigime.js'
+<div class="container">
+<header class="d-flex justify-content-center py-3">
+  <ul class="nav nav-pills">
+    <li class="nav-item align-self-center"><a href="/" class="nav-link active" aria-current="page"><img src="/img/logo.svg" alt="えきぎめ" width="64px" height="30px"></a></li>
+    <li class="nav-item align-self-center"><a href="/ekigime.html" class="nav-link">中間駅検索</a></li>
+    <li class="nav-item align-self-center"><a href="/hyakumeiten.html" class="nav-link">百名店検索</a></li>
+  </ul>
+</header>
 
-(async function () {
-    await init();
-    window.get_min_all_obj = function (eki_id) {
-        return JSON.parse(get_min_all_json(eki_id));
-    };
-    window.eki_id = JSON.parse(get_eki_all_json());
-    window.id_eki = {};
-    for (let eki in eki_id) {
-        window.id_eki[eki_id[eki]] = eki;
-    }
+<main class="d-flex justify-content-center py-1">
+<div class="row">
+<p>
+「えきぎめ」は、みんなで集合する駅の候補を表示して、イベントの開催をサポートするツールです。<br>
+ログイン不要、無料ですぐに利用することができます。<br>
+適当な駅にみんなで集まろう！</p>
 
-    // auto complete / suggest 用に datalist を追加
-    let datalist = document.createElement('datalist');
-    datalist.id = "ekilist";
-    for (let eki of Object.keys(eki_id).sort()) {
-        if (eki == "DUMMY") {
-            continue;
-        }
-        let option = document.createElement('option');
-        option.innerText = eki;
-        datalist.appendChild(option);
-    }
-    document.body.appendChild(datalist);
-})();
+<h2>中間駅検索</h2>
+<p>「荻窪」「練馬」「赤羽」、3つの駅から1番近いのは…？<br>
+皆の平均乗車時間を計算します！
+</p>
 
-window.min2string = function (min) {
-    let min_int = parseInt(min * 10, 10);
-    let hour_int = Math.floor(min_int / 600);
-    let min_nokori = min_int % 600;
-    if (hour_int >= 1) {
-        return String(hour_int) + '時間' + String(min_nokori / 10) + '分';
-    } else {
-        return String(min_nokori / 10) + '分';
-    }
-};
+<h2>百名店検索</h2>
+<p>指定の駅から一番近い「<a href="https://award.tabelog.com/hyakumeiten">食べログ百名店</a>」を表示します！</p>
 
-window.keisan = function () {
-    if (!window.get_min_all_obj || !window.eki_id) {
-        return;
-    }
-    // 計算
-    let result = [ {} ]; // index: 0 は合計値を格納する
-    let eki_max = 0;
-    for (let i = 1; i < 20 ; i++) {
-        let element = document.getElementById('eki' + i);
-        if (!element || !element.value || !eki_id[element.value]) {
-            eki_max = i - 1;
-            break;
-        }
-        let min_all = get_min_all_obj(eki_id[element.value]);
-        for (let eki_id in min_all) {
-            let min = parseInt(min_all[eki_id]);
-            result[0][eki_id] = result[0][eki_id] ? result[0][eki_id] + min : min;
-        }
-        result[i] = min_all;
-    }
-    let sorted_eki = Object.keys(id_eki).sort(function (eki_id1, eki_id2) {
-        return result[0][eki_id1] - result[0][eki_id2];
-    });
+<p>
+  <!-- はてなブックマーク -->
+  <a href="http://b.hatena.ne.jp/entry/http://ekigime.com/" class="hatena-bookmark-button" data-hatena-bookmark-layout="vertical-balloon" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border:none;" /></a>
 
-    //　出力
-    let emoji = { 0: '🥇', 1: '🥈', 2: '🥉', 3: '', 4: '' };
-    for (let i = 0; i < 5 ; i++) {
-        //console.log(sorted_eki[i] + ', ' + id_eki[sorted_eki[i]] + ', ' + result[0][sorted_eki[i]] + ', ');
-        for (let j = 1; j <= 10; j++) {
-            let element = document.getElementById('a' + j + '-' + (i + 1) );
-            element.innerText = j <= eki_max ? min2string(result[j][sorted_eki[i]]) : '';
-        }
-        let res = document.getElementById('result-' + (i + 1) );
-        res.innerText = emoji[i] + '\n' + id_eki[sorted_eki[i]];
-        let avg = document.getElementById('avg-' + (i + 1) );
-        avg.innerText = min2string(result[0][sorted_eki[i]] / eki_max);
-    }
-};
-</script>
-<table>
-<tr><td><a id="result-0">乗車時間ランキング：</a></td><td><a id="result-1"></a></td><td><a id="result-2"></a></td><td><a id="result-3"></a></td><td><a id="result-4"></a></td><td><a id="result-5"></a></td></tr>
-<tr><td><a id="avg-0">平均乗車時間：</a></td><td><a id="avg-1"></a></td><td><a id="avg-2"></a></td><td><a id="avg-3"></a></td><td><a id="avg-4"></a></td><td><a id="avg-5"></a></td></tr>
-<tr><td><input id="eki1" type="search" value="" list="ekilist" /></td><td><a id="a1-1"></a></td><td><a id="a1-2"></a></td><td><a id="a1-3"></a></td><td><a id="a1-4"></a></td><td><a id="a1-5"></a></td></tr>
-<tr><td><input id="eki2" type="search" value="" list="ekilist" /></td><td><a id="a2-1"></a></td><td><a id="a2-2"></a></td><td><a id="a2-3"></a></td><td><a id="a2-4"></a></td><td><a id="a2-5"></a></td></tr>
-<tr><td><input id="eki3" type="search" value="" list="ekilist" /></td><td><a id="a3-1"></a></td><td><a id="a3-2"></a></td><td><a id="a3-3"></a></td><td><a id="a3-4"></a></td><td><a id="a3-5"></a></td></tr>
-<tr><td><input id="eki4" type="search" value="" list="ekilist" /></td><td><a id="a4-1"></a></td><td><a id="a4-2"></a></td><td><a id="a4-3"></a></td><td><a id="a4-4"></a></td><td><a id="a4-5"></a></td></tr>
-<tr><td><input id="eki5" type="search" value="" list="ekilist" /></td><td><a id="a5-1"></a></td><td><a id="a5-2"></a></td><td><a id="a5-3"></a></td><td><a id="a5-4"></a></td><td><a id="a5-5"></a></td></tr>
-<tr><td><input id="eki6" type="search" value="" list="ekilist" /></td><td><a id="a6-1"></a></td><td><a id="a6-2"></a></td><td><a id="a6-3"></a></td><td><a id="a6-4"></a></td><td><a id="a6-5"></a></td></tr>
-<tr><td><input id="eki7" type="search" value="" list="ekilist" /></td><td><a id="a7-1"></a></td><td><a id="a7-2"></a></td><td><a id="a7-3"></a></td><td><a id="a7-4"></a></td><td><a id="a7-5"></a></td></tr>
-<tr><td><input id="eki8" type="search" value="" list="ekilist" /></td><td><a id="a8-1"></a></td><td><a id="a8-2"></a></td><td><a id="a8-3"></a></td><td><a id="a8-4"></a></td><td><a id="a8-5"></a></td></tr>
-<tr><td><input id="eki9" type="search" value="" list="ekilist" /></td><td><a id="a9-1"></a></td><td><a id="a9-2"></a></td><td><a id="a9-3"></a></td><td><a id="a9-4"></a></td><td><a id="a9-5"></a></td></tr>
-<tr><td><input id="eki10" type="search" value="" list="ekilist" /></td><td><a id="a10-1"></a></td><td><a id="a10-2"></a></td><td><a id="a10-3"></a></td><td><a id="a10-4"></a></td><td><a id="a10-5"></a></td></tr>
-</table>
-<button onclick="keisan()">計算</button>
+  <!-- pocket -->
+  <a data-save-url="http://ekigime.com/" data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a>
+</p>
+</div>
+</main>
 
+<footer class="d-flex justify-content-center">
+<div>© SMB 2023</div>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

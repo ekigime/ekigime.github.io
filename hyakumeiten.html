@@ -1,8 +1,22 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<link rel="stylesheet" href="/style.css">
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
+<title>えきぎめ - 百名店検索</title>
 </head>
 <body>
+<div class="container">
+<header class="d-flex justify-content-center py-3 align-items-center">
+  <ul class="nav nav-pills">
+    <li class="nav-item align-self-center"><a href="/" class="nav-link"><img src="/img/logo.svg" alt="えきぎめ" width="64px" height="30px"></a></li>
+    <li class="nav-item align-self-center"><a href="/ekigime.html" class="nav-link">中間駅検索</a></li>
+    <li class="nav-item align-self-center"><a href="/hyakumeiten.html" class="nav-link active" aria-current="page">百名店検索</a></li>
+  </ul>
+</header>
 <script type="module">
 import { get_min_all_json, get_eki_all_json, hyakumeiten_json, default as init } from './pkg/ekigime.js'
 
@@ -59,13 +73,34 @@ window.allchange = function (display) {
         e.style.display = display ? "block" : "none";
     }
 };
+
+window.i = 0;
+window.loading = function () {
+    // ローディングボタン表示
+    document.getElementById("hyoujibutton").disabled = true;
+    document.getElementById("hyoujimoji").innerText = "計算しています…" + (window.i++ ? "" : "(初回は1分ほどかかります！)");
+    document.getElementById("hyoujispinner").style.display = ""
+};
+
+window.stoploading = function () {
+    // ローディングボタン非表示
+    document.getElementById("hyoujispinner").style.display = "none"
+    document.getElementById("hyoujibutton").disabled = false;
+    document.getElementById("hyoujimoji").innerText = "表示する";
+};
+
 window.hyouji = function () {
     if (!window.get_min_all_obj || !window.eki_id) {
+        // ローディングボタン非表示
+        window.stoploading();
         return;
     }
+
     // 駅順
     let element = document.getElementById('eki');
     if (!element || !element.value || !eki_id[element.value]) {
+        // ローディングボタン非表示
+        window.stoploading();
         return;
     }
     let min_all = get_min_all_obj(eki_id[element.value]);
@@ -73,7 +108,7 @@ window.hyouji = function () {
     let result = Object.keys(eki_id).map(function (eki) {
         return [ eki, parseInt(min_all[eki_id[eki]]), hyakumeiten[eki_id[eki]] ];
     });
-    console.log(result);
+    //console.log(result);
 
     // 百名店があった駅だけ表示する
     result = result.filter(function (record) {
@@ -87,7 +122,7 @@ window.hyouji = function () {
             return 0;
         }
     });
-    console.log(result);
+    //console.log(result);
 
     let result_ele = document.getElementById('result');
     let category_list = {};
@@ -104,11 +139,29 @@ window.hyouji = function () {
     + Object.keys(category_list).sort().map(function (category) {
         return '<label><input checked="checked" class="check" onchange="checkchange(arguments[0])" type="checkbox" value="' + category + '">' + category + '</label>';
     }).join('') + output;
+
+    // ローディングボタン非表示
+    window.stoploading();
 };
 </script>
 
-<input id="eki" value="" list="ekilist" /> <button onclick="hyouji()">表示</button>
-<div id="result"></div>
+<main>
+<input id="eki" value="" list="ekilist" />
 
+<button id="hyoujibutton" onclick="loading(); setTimeout('hyouji()', 10)">
+<span id="hyoujispinner" style="display:none" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+<span id="hyoujimoji">表示する！</span>
+</button>
+
+<div id="result"></div>
+</main>
+
+<footer class="d-flex justify-content-center">
+<div>© SMB 2023</div>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<link href="/style.css" rel="stylesheet">
 </body>
 </html>
